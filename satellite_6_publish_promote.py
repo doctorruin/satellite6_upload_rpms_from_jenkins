@@ -54,9 +54,10 @@ def execute_publish_promote(server, user, passw, content_views, def_env=False, s
     envs = None
     for content_view in content_views:
         data = json.dumps({"search": content_view})
-        results = get_sat6(content_view_api, user, passw, headers, data)
-        cv_id = results.get(results[0]["id"])
-        envs = results.get(results[0]["environments"])
+        api_results = get_sat6(content_view_api, user, passw, headers, data)
+        results = api_results.get('results')
+        envs = results[0]['environments']
+        cv_id = results[0]['id']
         content_view_ids.append(cv_id)
 
     for e in envs:
