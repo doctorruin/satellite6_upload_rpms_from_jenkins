@@ -1,6 +1,7 @@
 # !/usr/bin/python
 import argparse
 import json
+import time
 from datetime import date
 
 import requests
@@ -136,6 +137,9 @@ def check_publish_status(content_view_api, user, passw, headers):
         print("Publish status is: " + status)
         if status == "success":
             done = True
+        else:
+            print("Publish is still pending...")
+            time.sleep(1)
 
     print("Ready to promote...")
     return
@@ -162,6 +166,7 @@ def promote_envs(promote_api, user, passw, headers, envs, today):
                                "description": today + "Jenkins promote to " + env_name})
             print("promoting to: " + env_name)
             post_sat6(promote_api, user, passw, headers, data)
+            print("promotion successful!")
 
     return
 
