@@ -34,7 +34,7 @@ def get_sat6(url, user, passw, headers, data=None):
         raise SystemExit(e)
 
     if results.get('error'):
-        print("Error: %s" % results['error']['message'])
+        print("Error: {}".format(results['error']['message']))
         exit(0)
 
     return results
@@ -51,7 +51,7 @@ def post_sat6(url, user, passw, headers, data):
     :return: json of request
     """
     # uncomment for debugging purposes
-    # print("POST Headers: %s" % headers)
+    # print("POST Headers: {}}".format(headers))
     try:
         results = requests.post(
             url,
@@ -66,7 +66,7 @@ def post_sat6(url, user, passw, headers, data):
         raise SystemExit(e)
 
     if results.get('error'):
-        print ("Error: %s" % results['error']['message'])
+        print ("Error: {}".format(results['error']['message']))
         exit(0)
 
     return results
@@ -83,7 +83,7 @@ def get_cv_params(content_view_api, user, passw, headers, content_view):
     :return: python list including id and environments object
     """
 
-    print("Getting content view information for %s" % content_view)
+    print("Getting content view information for {}".format(content_view))
     results = []
     data = json.dumps({"search": content_view})
     sat6_results = get_sat6(content_view_api, user, passw, headers, data)
@@ -91,7 +91,7 @@ def get_cv_params(content_view_api, user, passw, headers, content_view):
     results.append(api_results[0]['id'])
     results.append(api_results[0]['environments'])
 
-    print("get_cv_params results returned: %s" % results)
+    print("get_cv_params results returned: {}".format(results))
 
     return results
 
@@ -112,7 +112,7 @@ def publish_content_view(content_view_api, user, passw, headers, data, cv_id):
 
     results = post_sat6(publish_api, user, passw, headers, data)
     version_id = results['content_view_version_id']
-    print("publish_content_view version id returned: %s" % version_id)
+    print("publish_content_view version id returned: {}".format(version_id))
 
     print("Checking status before promoting to lifecycle environments...")
     check_publish_status(content_view_api, user, passw, headers)
@@ -134,7 +134,7 @@ def check_publish_status(content_view_api, user, passw, headers):
     while not done:
         results = get_sat6(content_view_api, user, passw, headers)
         status = results['last_event']['status']
-        print("Publish status is: %s" % status)
+        print("Publish status is: {}".format(status))
         if status == "success":
             done = True
         else:
@@ -164,7 +164,7 @@ def promote_envs(promote_api, user, passw, headers, envs, today):
         if not env_name == "Library":
             data = json.dumps({"environment_id": env_id,
                                "description": today + "Jenkins promote to " + env_name})
-            print("promoting to: %s" % env_name)
+            print("promoting to: {}".format(env_name))
             post_sat6(promote_api, user, passw, headers, data)
             print("promotion successful!")
 
@@ -196,11 +196,11 @@ def execute_publish_promote(server, user, passw, content_views, default_envs, no
     for content_view in content_views:
         print("Getting Content View ID and Environments...")
         cv_return = get_cv_params(content_view_api, user, passw, headers, content_view)
-        print("Content view %s id: %s" % content_view, cv_return[0])
+        print("Content view {0} id: {1}".format(content_view, cv_return[0]))
         content_view_information.append(cv_return)
 
     for cv in content_view_information:
-        print("Beginning publish for %s" %cv[0][0])
+        print("Beginning publish for {}".format(cv[0][0]))
         cv_id = cv[0][0]
         envs = cv[0][1]
 
