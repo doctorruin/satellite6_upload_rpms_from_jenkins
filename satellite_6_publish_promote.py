@@ -108,7 +108,7 @@ def publish_content_view(content_view_api, user, passw, headers, data, cv_id):
     :return: the content_view version being published
     """
 
-    publish_api = content_view_api + '/' + cv_id + '/publish'
+    publish_api = content_view_api + '/' + str(cv_id) + '/publish'
 
     results = post_sat6(publish_api, user, passw, headers, data)
     version_id = results['content_view_version_id']
@@ -194,13 +194,15 @@ def execute_publish_promote(server, user, passw, content_views, default_envs, no
 
     content_view_information = []
     for content_view in content_views:
+        print("Getting Content View ID and Environments.")
         cv_return = get_cv_params(content_view_api, user, passw, headers, content_view)
+        print("Content view " + content_view + " id: " + cv_return[0])
         content_view_information.append(cv_return)
 
     for cv in content_view_information:
-        print("Beginning publish for " + str(cv))
-        cv_id = cv[0]
-        envs = cv[1]
+        print("Beginning publish for " + str(cv[0][0]))
+        cv_id = cv[0][0]
+        envs = cv[0][1]
 
         description = today + " Jenkins Publish"
         publish_data = json.dumps({"description": description})
