@@ -66,8 +66,8 @@ def post_sat6(url, user, passw, headers, data):
         raise SystemExit(e)
 
     if results.get('error'):
-        print ("Error: {}".format(results['error']['message']))
-        exit(0)
+        print ("Error: {}".format(results['error']))
+        exit(-1)
 
     return results
 
@@ -135,7 +135,7 @@ def check_publish_status(content_view_api, user, passw, headers, version_id):
     check_version_api = base_api + "/content_view_versions/" + str(version_id)
     done = False
     while not done:
-        results = get_sat6(content_view_api, user, passw, headers)
+        results = get_sat6(check_version_api, user, passw, headers)
         status = results['last_event']['status']
         print("Publish status is: {}".format(status))
         if status == "successful":
@@ -211,7 +211,7 @@ def execute_publish_promote(server, user, passw, content_views, default_envs, no
         publish_data = json.dumps({"description": description})
         version_id = publish_content_view(content_view_api, user, passw, headers, publish_data, cv_id)
 
-        promote_api = sat6_api + 'content_view_versions/' + str(version_id)
+        promote_api = sat6_api + 'content_view_versions/' + str(version_id) + '/promote'
         if default_envs:
             promote_envs(promote_api, user, passw, headers, envs, today)
         else:
