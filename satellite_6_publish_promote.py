@@ -111,16 +111,16 @@ def publish_content_view(content_view_api, user, passw, headers, data, cv_id):
     publish_api = content_view_api + '/' + str(cv_id) + '/publish'
 
     results = post_sat6(publish_api, user, passw, headers, data)
-    version_id = results['content_view_version_id']
+    version_id = results['input']['content_view_version_id']
     print("publish_content_view version id returned: {}".format(version_id))
 
     print("Checking status before promoting to lifecycle environments...")
-    check_publish_status(content_view_api, user, passw, headers)
+    check_publish_status(content_view_api, user, passw, headers, version_id)
 
     return version_id
 
 
-def check_publish_status(content_view_api, user, passw, headers):
+def check_publish_status(content_view_api, user, passw, headers, version_id):
     """
     Check the status of the content view being published
     :param content_view_api: url for the content view endpoint
@@ -129,13 +129,16 @@ def check_publish_status(content_view_api, user, passw, headers):
     :param headers: API headers
     :return: status of the publish
     """
-
+    # have to modify url to check status
+    # split url by "/", and remove "content_views" to be replaced by "content_view_versions"
+    base_api = content_view_api.rsplit('/', 1)[0]
+    check_version_api = base_api + "/content_view_versions/" + str(version_id)
     done = False
     while not done:
         results = get_sat6(content_view_api, user, passw, headers)
         status = results['last_event']['status']
         print("Publish status is: {}".format(status))
-        if status == "success":
+        if status == "successful":
             done = True
         else:
             print("Publish is still pending...")
@@ -200,9 +203,9 @@ def execute_publish_promote(server, user, passw, content_views, default_envs, no
         content_view_information.append(cv_return)
 
     for cv in content_view_information:
-        print("Beginning publish for {}".format(cv[0][0]))
-        cv_id = cv[0][0]
-        envs = cv[0][1]
+        print("Beginning publish for {}".format(cv[0]))
+        cv_id = cv[0]
+        envs = cv[1]
 
         description = str(today) + " Jenkins Publish"
         publish_data = json.dumps({"description": description})
