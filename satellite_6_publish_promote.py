@@ -115,12 +115,12 @@ def publish_content_view(content_view_api, user, passw, headers, data, cv_id):
     print("publish_content_view version id returned: {}".format(version_id))
 
     print("Checking status before promoting to lifecycle environments...")
-    check_publish_status(content_view_api, user, passw, headers, version_id)
+    check_status(content_view_api, user, passw, headers, version_id, "Publish")
 
     return version_id
 
 
-def check_publish_status(content_view_api, user, passw, headers, version_id):
+def check_status(content_view_api, user, passw, headers, version_id, type):
     """
     Check the status of the content view being published
     :param content_view_api: url for the content view endpoint
@@ -137,18 +137,18 @@ def check_publish_status(content_view_api, user, passw, headers, version_id):
     while not done:
         results = get_sat6(check_version_api, user, passw, headers)
         status = results['last_event']['status']
-        print("Publish status is: {}".format(status))
+        print("{0}} status is: {1}".format(type, status))
         if status == "successful":
             done = True
         else:
-            print("Publish is still pending...")
+            print("{} is still pending...".format(type))
             time.sleep(1)
 
     print("Ready to promote...")
     return
 
 
-def promote_envs(promote_api, user, passw, headers, envs, today):
+def promote_envs(promote_api, content_view_api, user, passw, headers, envs, today, version_id):
     """
     Promote the published content view to the environments
     :param promote_api:
@@ -169,7 +169,9 @@ def promote_envs(promote_api, user, passw, headers, envs, today):
                                "description": today + "Jenkins promote to " + env_name})
             print("promoting to: {}".format(env_name))
             post_sat6(promote_api, user, passw, headers, data)
-            print("promotion successful!")
+            print("Checking status before promoting to next lifecycle environments...")
+            check_status(content_view_api, user, passw, headers, version_id, "Promote")
+            print("promotion of {} successful!".format(env_name))
 
     return
 
@@ -213,9 +215,9 @@ def execute_publish_promote(server, user, passw, content_views, default_envs, no
 
         promote_api = sat6_api + 'content_view_versions/' + str(version_id) + '/promote'
         if default_envs:
-            promote_envs(promote_api, user, passw, headers, envs, today)
+            promote_envs(promote_api, content_view_api, user, passw, headers, envs, today, version_id)
         else:
-            promote_envs(promote_api, user, passw, headers, non_default_envs, today)
+            promote_envs(promote_api, content_view_api, user, passw, headers, non_default_envs, today, version_id)
 
     print("Completed publish and promote!")
     exit(0)
